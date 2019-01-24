@@ -14,6 +14,7 @@ auctions.append(Auction(10))
 num_of_blocks_to_add = 20
 previous_block = auctions[0].bidChain[0]
 
+'''
 # Add blocks to the chain
 for i in range(0, num_of_blocks_to_add):
     block_to_add = auctions[0].createNextBid(previous_block, "Antonio", 100)
@@ -24,12 +25,13 @@ for i in range(0, num_of_blocks_to_add):
     # Tell everyone about it!
     print("Block #{} has been added to the blockchain!".format(block_to_add.index))
     print("Hash: {}\n".format(block_to_add.hash))
-
+'''
 
 class AuctionRepository(object):
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def list(self):
-        return json.dumps([ob.__dict__ for ob in auctions])
+        return [ob.data() for ob in auctions]
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -42,9 +44,12 @@ class AuctionRepository(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    @cherrypy.tools.json_in()
-    def createBid(self):
-        input_json = cherrypy.request.json
+    def getPuzzle(self):
+        input_json = cherrypy.request.headers
+        for auction in auctions:
+            if str(auction.auctionID) == str(input_json['auctionID']):
+                return auction.getLastBid().__dict__
+
 
 
 cherrypy.quickstart(AuctionRepository())
