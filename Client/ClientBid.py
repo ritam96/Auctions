@@ -1,6 +1,7 @@
 import hashlib
 import datetime
 
+
 class ClientBid(object):
     def __init__(self, index, timestamp, previousHash, nonce = 0):
         self.index = index
