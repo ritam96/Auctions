@@ -3,20 +3,33 @@ import datetime
 import uuid
 from ClientBid import ClientBid
 
-class Auction(object):
 
-    def __init__(self, startingPrice, image = "https://tinyurl.com/ydy8sbnd", description = "No description"):
+class Auction(object):
+    def __init__(self, startingPrice, deltaTime, exposedIdentities, englishAuction = False, blindAuction = False, maximumNumberBids = None, maximumNumberBidders = None, image = "https://tinyurl.com/ydy8sbnd", description = "No description"):
 
         self.auctionID = str(uuid.uuid4())
         self.image = image
         self.desc = description
         self.currentPrice = None
         self.startingPrice = None
+        self.englishAuction = englishAuction
+        self.blindAuction = blindAuction
+        self.exposedIdentities = exposedIdentities
+        self.maximumNumberBids = maximumNumberBids
+        self.maximumNumberBidders = maximumNumberBidders
+        self.endTime = datetime.datetime.now() + datetime.timedelta(hours=deltaTime)
+        self.ended = False
         self.bidChain = [self.createGenesisBid()]
 
     def hashFunction(self):
         sha = hashlib.sha256()
-        sha.update(str(self.image).encode('utf-8') + str(self.desc).encode('utf-8') + str(self.currentPrice).encode('utf-8') + str(self.auctionID).encode('utf-8'))
+        sha.update(str(self.image).encode('utf-8') + \
+        str(self.desc).encode('utf-8') + \
+        str(self.currentPrice).encode('utf-8') + \
+        str(self.auctionID).encode('utf-8') + \
+        str(self.englishAuction).encode('utf-8') + \
+        str(self.blindAuction).encode('utf-8') + \
+        str(self.exposedIdentities).encode('utf-8'))
         return sha.hexdigest()
 
     def createGenesisBid(self):
