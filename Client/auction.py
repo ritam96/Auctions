@@ -1,10 +1,17 @@
 import urllib.request, json
+import requests
 from tkinter import *
 import datetime
+import jwt
+from tkinter import messagebox
 
 LARGE_FONT= ("Verdana", 12)
 
-class SeaofBTCapp(Tk):
+class Main(Tk):
+    expiration= None;
+    idUtilizador = None;
+    sessionToken = None;
+
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
         container = Frame(self)
@@ -23,47 +30,65 @@ class SeaofBTCapp(Tk):
         frame.tkraise()
 
 class Login(Frame):
+    e=None
+    f=None
+    e1=None
+    f1=None
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Login", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
-
+        self.controller = controller
         labelframe = LabelFrame(self,text="Creat Account")
         labelframe.pack()
         a = Label(labelframe ,text="username").grid(row=0,column = 0)
         b = Label(labelframe ,text="password").grid(row=1,column=0)
-        e = Entry(labelframe)
-        e.grid(row=0,column=1)
-        f = Entry(labelframe,show="*")
-        f.grid(row=1,column=1)
+        Login.e = Entry(labelframe)
+        Login.e.grid(row=0,column=1)
+        Login.f = Entry(labelframe,show="*")
+        Login.f.grid(row=1,column=1)
         Button(labelframe, text="Create account", command=self.newUser).grid(row=2,column=0)
 
         labelframe1 = LabelFrame(self,text="Login")
         labelframe1.pack()
         a1 = Label(labelframe1 ,text="username").grid(row=1,column = 0)
         b1 = Label(labelframe1 ,text="password").grid(row=2,column=0)
-        e1 = Entry(labelframe1).grid(row=1,column=1)
-        f1 = Entry(labelframe1,show="*").grid(row=2,column=1)
+        Login.e1 = Entry(labelframe1)
+        Login.e1.grid(row=1,column=1)
+        Login.f1 = Entry(labelframe1,show="*")
+        Login.f1.grid(row=2,column=1)
         Button(labelframe1, text="LOGIN", command=self.login).grid(row=3,column=0)
-        Button(labelframe1, text="GO",command=lambda: controller.show_frame(List)).grid(row=4,column=0)
 
     def newUser(self):
-        name = e.get()
-        pw=f.get()
-        pwhash = crypt(pw)
-        j = {"name" : name, "pass" : pwhash}
+        name = Login.e.get()
+        pw=Login.f.get()
+        #pwhash = crypt(pw)
+        j = {"name" : name, "password" : pw}
         headers = {'content-type':'application/json'}
-        r = requests.post("http://192.168.1.70:8080/postTest",data=json.dumps(j),headers=headers)
+        r = requests.post("http://192.168.1.70:8080/createAccount",data=json.dumps(j),headers=headers)
         print(r.text)
 
+
     def login(self):
-        '''pwhash = ir buscar o que está encriptado na api
-        alleged_pw = f1.get()
-        if pwhash == crypt(alleged_pw, pwhash):
-            print("Password good")
+        name=Login.e1.get()
+        pw=Login.f1.get()
+        j = {"name" : name, "password" : pw}
+        headers = {'content-type':'application/json'}
+        r = requests.post("http://192.168.1.70:8080/login",data=json.dumps(j),headers=headers)
+        data= json.loads(r.text)
+        print(data)
+        if data.get('error'):
+            messagebox.showerror("Error", data['description'])
         else:
-            print("Invalid password")'''
-        print("outra vez")
+            Main.sessionToken = data['sessionToken'];
+            decode = jwt.decode(Main.sessionToken, pw, algorithms=['HS256'])
+            Main.expiration=decode['expiration'] ;
+            Main.idUtilizador = decode['UserID'];
+            print(Main.sessionToken)
+            print(Main.expiration)
+            print(Main.idUtilizador)
+            self.controller.show_frame(List)
+
 
 class List(Frame):
     def __init__(self, parent, controller):
@@ -76,11 +101,10 @@ class List(Frame):
         menubar.add_command(label="Create auction", command=lambda: controller.show_frame(NewAuction))
         menubar.add_command(label="My auctions", command=lambda: controller.show_frame(MyAuctions))
         menubar.add_command(label="Bid history", command=lambda: controller.show_frame(BidHistory))
-        menubar.add_command(label="Logout")
+        menubar.add_command(label="Logout", command=self.logout)
         controller.config(menu=menubar)
 
-
-
+        self.controller = controller
 
         #with urllib.request.urlopen("http://192.168.1.70:8080/list") as url:
         #    data = json.loads(url.read().decode())
@@ -101,8 +125,12 @@ class List(Frame):
 
             b = Button(labelframe, text="Bid", command=lambda: controller.show_frame(Bid)).grid(row=0,column=20)
 
-
-
+    def logout(self):
+        Main.expiration= None;
+        Main.idUtilizador = None;
+        Main.sessionToken = None;
+        print("sair")
+        self.controller.show_frame(Login)
 
 
 
@@ -251,5 +279,5 @@ class Bid(Frame):
         pinInput = Entry(labelframe,show="*")
         pinInput.grid(row=5,column=1)
 
-app = SeaofBTCapp()
+app = Main()
 app.mainloop()
