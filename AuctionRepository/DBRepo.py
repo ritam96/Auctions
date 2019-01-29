@@ -6,6 +6,20 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
+class UserRepo(Base):
+    __tablename__ = 'User'
+
+    UserID = Column(TEXT, primary_key = True)
+    password = Column(TEXT, nullable = False)
+    sessionToken  = Column(TEXT, nullable = True)
+    sessionExpires = Column(TEXT, nullable = True)
+
+    auctions = relationship('AuctionRepo', back_populates = 'user')
+
+    bids = relationship('BidRepo', back_populates = 'user')
+
+    receipts = relationship('ReceiptRepo', back_populates = 'user')
+
 class AuctionRepo(Base):
     __tablename__ = 'Auction'
 
@@ -22,37 +36,77 @@ class AuctionRepo(Base):
     endTime = Column(TEXT, nullable = False)
     ended = Column(TEXT, nullable = False)
 
-class UserRepo(Base):
-    __tablename__ = 'User'
+    UserID = Column(TEXT, ForeignKey('User.UserID'), nullable = False)
+    user = relationship('UserRepo', back_populates = 'auctions')
 
-    UserID = Column(TEXT, primary_key = True)
-    password = Column(TEXT, nullable = False)
-    sessionToken  = Column(TEXT, nullable = True)
-    sessionExpires = Column(TEXT, nullable = True)
+    bids = relationship('BidRepo', back_populates = 'auction')
 
-class ReceiptRepo(Base):
-    __tablename__ = 'Receipt'
+    def create(self, auction):
+        self.AuctionID = auction.auctionID
+        self.UserID = auction.userID
+        self.image = auction.image
+        self.description = auction.desc
+        self.currentPrice = auction.currentPrice
+        self.startingPrice = auction.startingPrice
+        self.englishAuction = auction.englishAuction
+        self.blindAuction = auction.blindAuction
+        self.exposedIdentitites = auction.exposedIdentities
+        self.maximumNumberBids = auction.maximumNumberBids
+        self.maximumNumberBidders = auction.maximumNumberBidders
+        self.endTime = auction.endTime
+        self.ended = auction.ended 
 
-    ReceiptID = Column(TEXT, primary_key = True)
-    UserID = Column(TEXT, ForeignKey('User.UserID'), primary_key = True)
-    user = relationship(UserRepo)
 
 class BidRepo(Base):
     __tablename__ = 'Bid'
 
     AuctionID = Column(TEXT, ForeignKey('Auction.AuctionID'), primary_key = True)
-    auction = relationship(AuctionRepo)
-    BidID = Column(TEXT, primary_key = True)
+    auction = relationship('AuctionRepo', back_populates= 'bids')
+
+    BidID = Column(TEXT, nullable = False, primary_key = True)
+
     UserID = Column(TEXT, ForeignKey('User.UserID'))
-    user = relationship(UserRepo)
-    ReceiptID = Column(TEXT, ForeignKey('Receipt.ReceiptID'), nullable = False)
-    receipt = relationship(ReceiptRepo)
+    user = relationship('UserRepo', back_populates = 'bids')
+
+    ReceiptID = Column(TEXT, ForeignKey('Receipt.ReceiptID'))
+    receipt = relationship('ReceiptRepo', back_populates = 'bid', foreign_keys = 'BidRepo.ReceiptID', uselist = False)
+
     timestamp = Column(TEXT, nullable = False)
     value = Column(TEXT, nullable = False)
     nonce = Column(TEXT, nullable = False)
     previousHash = Column(TEXT, nullable = False)
     hash = Column(TEXT, nullable = False)
     miningDifficulty = Column(TEXT, nullable = False)
+
+    def create(self, bid):
+        self.AuctionID = bid.auctionID
+        self.BidID = bid.index
+        self.UserID = bid.userID
+        self.timestamp = bid.timestamp
+        self.value = bid.value
+        self.nonce = bid.nonce
+        self.previousHash = bid.previousHash
+        self.hash = bid.hash
+        self.miningDifficulty = bid.miningDifficulty
+
+
+
+
+class ReceiptRepo(Base):
+    __tablename__ = 'Receipt'
+
+    ReceiptID = Column(TEXT, primary_key = True)
+
+    UserID = Column(TEXT, ForeignKey('User.UserID'))
+    user = relationship('UserRepo', back_populates = 'receipts')
+
+    AuctionID = Column(TEXT, ForeignKey('Bid.AuctionID'))
+    BidID = Column(TEXT, ForeignKey('Bid.BidID'), primary_key = True)
+    
+    bid = relationship('BidRepo', back_populates = 'receipt', foreign_keys='BidRepo.ReceiptID')
+    
+    identity = Column(TEXT, nullable = True)
+
 
 
 # Create an engine that stores data in the local directory's

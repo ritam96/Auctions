@@ -5,19 +5,20 @@ from ClientBid import ClientBid
 
 
 class Auction(object):
-    def __init__(self, startingPrice, deltaTime, exposedIdentities, englishAuction = False, blindAuction = False, maximumNumberBids = None, maximumNumberBidders = None, image = "https://tinyurl.com/ydy8sbnd", description = "No description"):
+    def __init__(self, user, deltaTime, exposedIdentities, startingPrice = None, englishAuction = False, blindAuction = False, maximumNumberBids = None, maximumNumberBidders = None, image = "https://tinyurl.com/ydy8sbnd", description = "No description"):
 
         self.auctionID = str(uuid.uuid4())
+        self.userID = user.UserID
         self.image = image
         self.desc = description
         self.currentPrice = None
-        self.startingPrice = None
+        self.startingPrice = startingPrice
         self.englishAuction = englishAuction
         self.blindAuction = blindAuction
         self.exposedIdentities = exposedIdentities
         self.maximumNumberBids = maximumNumberBids
         self.maximumNumberBidders = maximumNumberBidders
-        self.endTime = datetime.datetime.now() + datetime.timedelta(hours=deltaTime)
+        self.endTime = datetime.datetime.now() + datetime.timedelta(hours=float(deltaTime))
         self.ended = False
         self.bidChain = [self.createGenesisBid()]
 
