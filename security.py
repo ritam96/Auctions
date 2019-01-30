@@ -46,3 +46,5 @@ def decryptWithDH(data, key, nonce):
     ret = decryptor.update(data)
     return ret
 
+def encryptWithCertServerSide(data, cert):
+    pass

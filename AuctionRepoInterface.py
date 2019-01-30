@@ -452,7 +452,7 @@ class AuctionRepository(object):
 
 
     # When user needs to send a message, first he must send a SIGNED diffie hellman request (cc and public key of server)
-    # JSON: {'userID': ___, 'sessionToken': ___, sharedPrime':___, 'sharedBase': ___, 'value': ___}
+    # JSON: {'userID': ___, 'sessionToken': ___, sharedPrime':___, 'sharedBase': ___, 'value': ___, 'cert': ___}
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -478,6 +478,7 @@ class AuctionRepository(object):
         sharedKey = (value ** secret) % int(data['sharedPrime'])
 
         user.sharedKey = sharedKey
+        user.certificate = data['cert']
         session.commit()
         session.close()
 

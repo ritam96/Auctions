@@ -15,6 +15,7 @@ class UserRepo(Base):
     sessionExpires = Column(TEXT, nullable = True)
 
     sharedKey = Column(TEXT, nullable = True)
+    certificate = Column(TEXT, nullable = True)
 
     auctions = relationship('AuctionRepo', back_populates = 'user')
 
