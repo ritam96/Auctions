@@ -452,7 +452,7 @@ class AuctionRepository(object):
 
 
     # When user needs to send a message, first he must send a SIGNED diffie hellman request (cc and public key of server)
-    # JSON: {'userID': ___, 'sessionToken': ___, sharedPrime':___, 'sharedBase': ___, 'value': ___, 'cert': ___}
+    # JSON: {'userID': ___, 'sessionToken': ___, sharedPrime':___, 'sharedBase': ___, 'value': ___, 'CCcert': ___, 'cert': ___}
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
