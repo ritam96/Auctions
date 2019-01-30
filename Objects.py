@@ -36,7 +36,9 @@ class Auction(object):
     def createGenesisBid(self):
         # Manually construct a block with
         # index zero and arbitrary previous hash (we'll use the auction hash)
-        return Bid(0, str(datetime.datetime.now()), "Genesis Bid" , 0, self.hashFunction())
+        genesis = Bid(0, str(datetime.datetime.now()), "Genesis Bid" , 0, self.hashFunction())
+        genesis.miningDifficulty = 0
+        return genesis
 
     def createNextBid(self, lastBid, bidder, value):
         index = lastBid.index + 1

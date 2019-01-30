@@ -14,6 +14,8 @@ class UserRepo(Base):
     sessionToken  = Column(TEXT, nullable = True)
     sessionExpires = Column(TEXT, nullable = True)
 
+    sharedKey = Column(TEXT, nullable = True)
+
     auctions = relationship('AuctionRepo', back_populates = 'user')
 
     bids = relationship('BidRepo', back_populates = 'user')
@@ -78,10 +80,10 @@ class BidRepo(Base):
     hash = Column(TEXT, nullable = False)
     miningDifficulty = Column(TEXT, nullable = False)
 
-    def create(self, bid):
-        self.AuctionID = bid.auctionID
+    def create(self, bid, auctionID, userID):
+        self.AuctionID = auctionID
         self.BidID = bid.index
-        self.UserID = bid.userID
+        self.UserID = userID
         self.timestamp = bid.timestamp
         self.value = bid.value
         self.nonce = bid.nonce
