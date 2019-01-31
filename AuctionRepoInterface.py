@@ -11,13 +11,10 @@ from Objects import Auction, Bid
 from DBRepo import AuctionRepo, BidRepo, UserRepo, ReceiptRepo
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import security
 
 cherrypy.server.socket_host = '192.168.1.70'
 cherrypy.server.socket_port = 8080
-#cherrypy.ssl_module = 'pyopenssl'
-#cherrypy.server.ssl_certificate = 'AuctionSystem.crt'
-#cherrypy.server.ssl_certificate_chain = "AuctionRepo.pem"
-#cherrypy.server.ssl_private_key = "AuctionRepoPKey.pem"
 
 # an Engine, which the Session will use for connection
 # resources
@@ -44,6 +41,9 @@ def verifyUserSession(user, sessionToken):
     return True
 
 def verifyBidValidity(bidValues, auction, user):
+
+    if str(auction.ended) == '1':
+        return False
     
     # The lowest nextBidID possible for this auction (genesis bid)
     nextID = 1
@@ -198,8 +198,11 @@ class AuctionRepository(object):
         for dict in auctions:
             del dict['_sa_instance_state']
         
+        #ret = security.cipher(auctions, user.sharedKey, user.certificate)
         # close DB session
         session.close()
+
+        
         return auctions
 
 

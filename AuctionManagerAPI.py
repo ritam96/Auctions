@@ -37,15 +37,6 @@ def verifyAuctions():
     session.close()
 
 
-class AuctionManagerAPI(object):
-
-    @cherrypy.expose
-    @cherrypy.tools.json_in()
-    @cherrypy.tools.json_out()
-    def verifyBid(self):
-        data = cherrypy.request.json
-
-
 
 schedule.every(0.1).minutes.do(verifyAuctions)
 
